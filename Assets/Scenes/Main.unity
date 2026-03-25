@@ -148,6 +148,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2137cdeee05a5425898fd14a67511d1d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraPicture
+  depthBlitMaterial: {fileID: 2100000, guid: 498285b30faea4dd684d4d7e2497c66e, type: 2}
   FileCounter: 0
   cam1: {fileID: 330585545}
   cam2: {fileID: 640604290}
@@ -379,7 +380,7 @@ Camera:
     width: 1
     height: 1
   near clip plane: 0.3
-  far clip plane: 1000
+  far clip plane: 25
   field of view: 40
   orthographic: 0
   orthographic size: 5
@@ -957,7 +958,7 @@ Camera:
     width: 1
     height: 1
   near clip plane: 0.3
-  far clip plane: 1000
+  far clip plane: 25
   field of view: 40
   orthographic: 0
   orthographic size: 5
@@ -1094,7 +1095,7 @@ Camera:
     width: 1
     height: 1
   near clip plane: 0.3
-  far clip plane: 1000
+  far clip plane: 25
   field of view: 40
   orthographic: 0
   orthographic size: 5

@@ -6,6 +6,7 @@ using UnityEngine.Experimental.Rendering;
 
 public class CameraPicture : MonoBehaviour
 {
+    public Material depthBlitMaterial;
     public int FileCounter = 0;
     public Camera cam1;
     public Camera cam2;
@@ -31,37 +32,65 @@ public class CameraPicture : MonoBehaviour
         Debug.Log("Captured frame: " + FileCounter);
     }
 
-    void SaveCam(Camera cam, string camName)
+       void SaveCam(Camera cam, string camName)
     {
-        // Create a fresh RT each capture so we don't need the camera active
-        RenderTexture rt = new RenderTexture(Screen.width, Screen.height, 24, RenderTextureFormat.ARGB32);
-        rt.depthStencilFormat = GraphicsFormat.D24_UNorm_S8_UInt;
-        rt.Create();
-
-        cam.targetTexture = rt;
-
-        // Temporarily enable just long enough to render one frame
-        bool wasActive = cam.gameObject.activeSelf;
-        cam.gameObject.SetActive(true);
-        cam.Render();
-        cam.gameObject.SetActive(wasActive);
-
-        cam.targetTexture = null;
-
-        RenderTexture.active = rt;
-        Texture2D image = new Texture2D(rt.width, rt.height, TextureFormat.RGB24, false);
-        image.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0);
-        image.Apply();
-        RenderTexture.active = null;
-
-        Destroy(rt);
-
         string directory = Application.dataPath + "/Backgrounds/";
         if (!Directory.Exists(directory))
             Directory.CreateDirectory(directory);
 
-        byte[] bytes = image.EncodeToPNG();
-        Destroy(image);
-        File.WriteAllBytes(directory + FileCounter + "_" + camName + ".png", bytes);
+        // --- RGB capture ---
+RenderTexture rtColor = new RenderTexture(Screen.width, Screen.height, 24, RenderTextureFormat.ARGB32);
+        rtColor.Create();
+
+        cam.targetTexture = rtColor;
+        bool wasActive = cam.gameObject.activeSelf;
+        cam.gameObject.SetActive(true);
+        cam.Render();
+        cam.gameObject.SetActive(wasActive);
+        cam.targetTexture = null;
+
+        RenderTexture.active = rtColor;
+        Texture2D colorImage = new Texture2D(rtColor.width, rtColor.height, TextureFormat.RGB24, false);
+        colorImage.ReadPixels(new Rect(0, 0, rtColor.width, rtColor.height), 0, 0);
+        colorImage.Apply();
+        RenderTexture.active = null;
+        Destroy(rtColor);
+
+        File.WriteAllBytes(directory + FileCounter + "_" + camName + "_rgb.png",
+            colorImage.EncodeToPNG());
+        Destroy(colorImage);
+
+        // --- Depth capture ---
+RenderTexture rtDepth = new RenderTexture(Screen.width, Screen.height, 24, RenderTextureFormat.Depth);
+rtDepth.depthStencilFormat = GraphicsFormat.D32_SFloat;
+rtDepth.Create();
+
+RenderTexture rtDepthColor = new RenderTexture(Screen.width, Screen.height, 24, RenderTextureFormat.RFloat);
+rtDepthColor.Create();
+
+cam.targetTexture = rtDepth;
+cam.gameObject.SetActive(true);
+cam.Render();
+cam.gameObject.SetActive(wasActive);
+cam.targetTexture = null;
+
+// Use the shader material instead of plain Blit
+Graphics.Blit(rtDepth, rtDepthColor, depthBlitMaterial);
+Destroy(rtDepth);
+
+RenderTexture.active = rtDepthColor;
+Texture2D depthImage = new Texture2D(rtDepthColor.width, rtDepthColor.height, TextureFormat.RFloat, false);
+depthImage.ReadPixels(new Rect(0, 0, rtDepthColor.width, rtDepthColor.height), 0, 0);
+depthImage.Apply();
+RenderTexture.active = null;
+Destroy(rtDepthColor);
+
+File.WriteAllBytes(directory + FileCounter + "_" + camName + "_depth.png",
+    depthImage.EncodeToPNG());
+Destroy(depthImage);
+
+        File.WriteAllBytes(directory + FileCounter + "_" + camName + "_depth.png",
+            depthImage.EncodeToPNG());
+        Destroy(depthImage);
     }
 }
