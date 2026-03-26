@@ -64,6 +64,9 @@ sysinfo.txt
 *.unitypackage.meta
 *.app
 
+# macbs
+.DS_Store
+
 # Crashlytics generated file
 crashlytics-build.properties
 
