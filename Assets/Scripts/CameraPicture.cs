@@ -65,7 +65,7 @@ RenderTexture rtDepth = new RenderTexture(Screen.width, Screen.height, 24, Rende
 rtDepth.depthStencilFormat = GraphicsFormat.D32_SFloat;
 rtDepth.Create();
 
-RenderTexture rtDepthColor = new RenderTexture(Screen.width, Screen.height, 24, RenderTextureFormat.RFloat);
+RenderTexture rtDepthColor = new RenderTexture(Screen.width, Screen.height, 0, RenderTextureFormat.ARGB32);
 rtDepthColor.Create();
 
 cam.targetTexture = rtDepth;
@@ -79,7 +79,7 @@ Graphics.Blit(rtDepth, rtDepthColor, depthBlitMaterial);
 Destroy(rtDepth);
 
 RenderTexture.active = rtDepthColor;
-Texture2D depthImage = new Texture2D(rtDepthColor.width, rtDepthColor.height, TextureFormat.RFloat, false);
+Texture2D depthImage = new Texture2D(rtDepthColor.width, rtDepthColor.height, TextureFormat.RGB24, false);
 depthImage.ReadPixels(new Rect(0, 0, rtDepthColor.width, rtDepthColor.height), 0, 0);
 depthImage.Apply();
 RenderTexture.active = null;

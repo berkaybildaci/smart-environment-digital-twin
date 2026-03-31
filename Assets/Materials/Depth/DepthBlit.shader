@@ -48,12 +48,22 @@ Shader "Custom/DepthBlit"
                 return OUT;
             }
 
+            float3 JetColormap(float t)
+            {
+                float3 c;
+                c.r = saturate(1.5 - abs(4.0 * t - 3.0));
+                c.g = saturate(1.5 - abs(4.0 * t - 2.0));
+                c.b = saturate(1.5 - abs(4.0 * t - 1.0));
+                return c;
+            }
+
             float4 Frag(Varyings IN) : SV_Target
             {
                 float depth = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, IN.uv).r;
                 float linearDepth = Linear01Depth(depth, _ZBufferParams);
-                float result = _Invert > 0.5 ? 1.0 - linearDepth : linearDepth;
-                return float4(result, result, result, 1.0);
+                float t = _Invert > 0.5 ? 1.0 - linearDepth : linearDepth;
+                float3 color = JetColormap(t);
+                return float4(color, 1.0);
             }
             ENDHLSL
         }
