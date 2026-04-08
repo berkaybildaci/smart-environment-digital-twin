@@ -20,6 +20,11 @@ public class CameraPicture : MonoBehaviour
         }
     }
 
+    public void TriggerCapture()
+    {
+        StartCoroutine(CaptureAll());
+    }
+
     IEnumerator CaptureAll()
     {
         yield return new WaitForEndOfFrame();
@@ -88,9 +93,5 @@ Destroy(rtDepthColor);
 File.WriteAllBytes(directory + FileCounter + "_" + camName + "_depth.png",
     depthImage.EncodeToPNG());
 Destroy(depthImage);
-
-        File.WriteAllBytes(directory + FileCounter + "_" + camName + "_depth.png",
-            depthImage.EncodeToPNG());
-        Destroy(depthImage);
     }
 }
