@@ -4,6 +4,8 @@ Shader "Custom/DepthBlit"
     {
         _MainTex ("Texture", 2D) = "white" {}
         [Toggle] _Invert ("Invert Depth", Float) = 0
+        _NearClip ("Near Clip (meters)", Float) = 0.1
+        _FarClip ("Far Clip (meters)", Float) = 20.0
     }
 
     SubShader
@@ -27,6 +29,8 @@ Shader "Custom/DepthBlit"
             SAMPLER(sampler_MainTex);
 
             float _Invert;
+            float _NearClip;
+            float _FarClip;
 
             struct Attributes
             {
@@ -60,8 +64,14 @@ Shader "Custom/DepthBlit"
             float4 Frag(Varyings IN) : SV_Target
             {
                 float depth = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, IN.uv).r;
-                float linearDepth = Linear01Depth(depth, _ZBufferParams);
-                float t = _Invert > 0.5 ? 1.0 - linearDepth : linearDepth;
+
+                // Reversed-Z: depth=1 at near, depth=0 at far
+                // Linear eye depth = near * far / (near + depth * (far - near))
+                float linearDepth = _NearClip * _FarClip / (_NearClip + depth * (_FarClip - _NearClip));
+
+                // Map to 0-1 range within near/far, close=0 (blue), far=1 (red)
+                float t = saturate((linearDepth - _NearClip) / (_FarClip - _NearClip));
+                t = _Invert > 0.5 ? 1.0 - t : t;
                 float3 color = JetColormap(t);
                 return float4(color, 1.0);
             }
